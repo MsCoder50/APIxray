@@ -1,13 +1,119 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Hello World!</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PostMan Clone</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/src/index.css">
   </head>
   <body>
-    <h1>💖 Hello World!</h1>
-    <p>Welcome to your Electron application.</p>
+    <div class="app-container">
+      
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <button id="btn-select-project" class="btn primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a2 2 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4H2.19zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139h12.988l-.004-.01A1 1 0 0 0 13.5 2H9.828a1 1 0 0 0-.707.293L8.293 3h-.586l-.828-.828z"/>
+            </svg>
+            Select Project
+          </button>
+          <div id="project-type-badge" class="badge hidden"></div>
+        </div>
+        <div class="sidebar-content">
+          <ul id="route-list" class="route-list">
+            <!-- Dynamic Routes go here -->
+            <li class="empty-state">No project selected.</li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- MAIN AREA -->
+      <main class="main-area">
+        
+        <!-- REQUEST TOPBAR -->
+        <header class="request-topbar">
+          <div class="url-input-group">
+            <div id="request-method" class="method-badge">GET</div>
+            <input type="text" id="request-url" placeholder="Enter request URL (e.g. http://localhost:3000/api/...)" />
+            <button id="btn-send" class="btn primary">Send</button>
+          </div>
+        </header>
+
+        <!-- REQUEST CONFIGURATION -->
+        <section class="request-config">
+          <div class="tabs">
+            <button class="tab active" data-tab="params">Params</button>
+            <button class="tab" data-tab="path">Path Vars</button>
+            <button class="tab" data-tab="headers">Headers</button>
+            <button class="tab" data-tab="body">Body</button>
+          </div>
+          
+          <div class="tab-content-container">
+            <!-- Params Tab -->
+            <div id="tab-params" class="tab-pane active">
+              <div class="key-value-list" id="query-params-list">
+                <div class="empty-hint">No query parameters detected.</div>
+              </div>
+            </div>
+            
+            <!-- Path Tab -->
+            <div id="tab-path" class="tab-pane">
+              <div class="key-value-list" id="path-params-list">
+                <div class="empty-hint">No path variables detected.</div>
+              </div>
+            </div>
+            
+            <!-- Headers Tab -->
+            <div id="tab-headers" class="tab-pane">
+              <div class="key-value-list" id="headers-list">
+                <div class="kv-row">
+                  <input type="text" class="kv-key" placeholder="Key (e.g., Authorization)">
+                  <input type="text" class="kv-val" placeholder="Value (e.g., Bearer ...)">
+                  <button class="btn-remove">x</button>
+                </div>
+              </div>
+              <button id="btn-add-header" class="btn secondary mt-2">+ Add Header</button>
+            </div>
+            
+            <!-- Body Tab -->
+            <div id="tab-body" class="tab-pane">
+              <div class="body-options">
+                <label><input type="radio" name="bodyType" value="none" checked> None</label>
+                <label><input type="radio" name="bodyType" value="json"> raw (JSON)</label>
+                <label><input type="radio" name="bodyType" value="form"> auto-form (detected)</label>
+              </div>
+              
+              <!-- Auto Form fields (for detected params) -->
+              <div id="body-auto-form" class="key-value-list hidden mt-2"></div>
+              
+              <!-- Raw JSON editor -->
+              <textarea id="body-raw-json" class="json-editor hidden mt-2" placeholder="{&#10;  &#34;key&#34;: &#34;value&#34;&#10;}"></textarea>
+            </div>
+          </div>
+        </section>
+
+        <!-- RESPONSE VIEWER -->
+        <section class="response-viewer">
+          <header class="response-header">
+            <h3>Response</h3>
+            <div class="response-meta">
+              <span id="response-status" class="meta-item">Status: ---</span>
+              <span id="response-time" class="meta-item">Time: --- ms</span>
+            </div>
+          </header>
+          <div class="response-body">
+            <pre><code id="response-content">Hit Send to get a response...</code></pre>
+          </div>
+        </section>
+
+      </main>
+    </div>
     <script type="module" src="/src/renderer.js"></script>
   </body>
 </html>

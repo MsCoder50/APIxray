@@ -1,8 +1,12 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
 
-// Handle creating/removing shortcuts on Windows when installing/uninstalling.
+// Import Backend Scripts
+import { detectProjectType } from './backend/loader.js';
+import { scanApiRoutes } from './backend/scanner.js';
+import { detectParameters } from './backend/parameters.js';
+import { sendRequest } from './backend/post.js';// Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
   app.quit();
 }
@@ -32,6 +36,34 @@ const createWindow = () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  // IPC Setup
+  ipcMain.handle('dialog:openDirectory', async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+      properties: ['openDirectory']
+    });
+    if (canceled) {
+      return null;
+    } else {
+      return filePaths[0];
+    }
+  });
+
+  ipcMain.handle('api:detectProject', async (event, projectPath) => {
+    return detectProjectType(projectPath);
+  });
+
+  ipcMain.handle('api:scanRoutes', async (event, projectPath, type) => {
+    return scanApiRoutes(projectPath, type);
+  });
+
+  ipcMain.handle('api:detectParams', async (event, filePath, method, type) => {
+    return detectParameters(filePath, method, type);
+  });
+
+  ipcMain.handle('api:sendRequest', async (event, requestData) => {
+    return await sendRequest(requestData);
+  });
+
   createWindow();
 
   // On OS X it's common to re-create a window in the app when the
