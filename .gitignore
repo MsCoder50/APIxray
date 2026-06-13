@@ -14,7 +14,7 @@ dist-ssr/
 *.local
 
 # Electron Forge / Vite build outputs
-out/
+/out
 .vite/
 
 # Editor directories and files
