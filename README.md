@@ -10,7 +10,7 @@
 - **Smart Parameter Extraction:** Automatically extracts required query parameters, path variables, and body fields from your code.
 - **Modern Interface:** Built with Vite and Electron for a snappy, responsive UI.
 - **No Manual Configuration:** Spend less time writing endpoint URLs and headers and more time testing.
-- **Cross-Platform:** Available for Windows, macOS, and Linux.
+- **Cross-Platform:** Available for Linux Only.
 
 ---
 
@@ -72,9 +72,8 @@ graph TD
 ## 📦 Downloads & Releases
 
 Pre-compiled binaries are available for Windows and Linux. 
-*(If you are hosting this on GitHub, upload the built `.exe` and `.deb` files to the **Releases** tab on GitHub).*
+*(If you are hosting this on GitHub, upload the built `.deb` files to the **Releases** tab on GitHub).*
 
-- **[Windows (.exe) Installer](https://github.com/MsCoder50/APIxray/releases/latest)**
 - **[Linux (.deb) Package](https://github.com/MsCoder50/APIxray/releases/latest)**
 
 ---
