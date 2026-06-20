@@ -1,6 +1,17 @@
-# APIxray 🩻
+# APIxray
 
 **APIxray** is a modern, fast, Postman-like desktop application built with Electron, Vite, and JavaScript. It automatically scans your backend projects (Next.js, Express) to instantly discover API routes and their required parameters (path, query, body), eliminating the need for manual endpoint configuration. 
+
+---
+
+## 📸 Screenshots
+
+<p align="center">
+  <img src="screenshots/1.png" width="45%" alt="APIxray Workspace" />
+  <img src="screenshots/2.png" width="45%" alt="API Route Discovery" />
+  <img src="screenshots/3.png" width="45%" alt="Parameter Extraction" />
+  <img src="screenshots/4.png" width="45%" alt="Response Viewer" />
+</p>
 
 ---
 

@@ -6,7 +6,7 @@ import started from 'electron-squirrel-startup';
 import { detectProjectType } from './backend/loader.js';
 import { scanApiRoutes } from './backend/scanner.js';
 import { detectParameters } from './backend/parameters.js';
-import { sendRequest } from './backend/post.js';if (started) {
+import { sendRequest } from './backend/post.js'; if (started) {
   app.quit();
 }
 
@@ -14,13 +14,14 @@ const createWindow = () => {
   const iconPath = app.isPackaged
     ? path.join(process.resourcesPath, 'icon.png')
     : path.join(app.getAppPath(), 'src/assets/images/icon.png');
-  
+
   const appIcon = nativeImage.createFromPath(iconPath);
 
   const mainWindow = new BrowserWindow({
     width: 1280,
     height: 720,
     icon: appIcon,
+    title: "APIxray",
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
