@@ -4,9 +4,12 @@ import started from 'electron-squirrel-startup';
 
 // Import Backend Scripts
 import { detectProjectType } from './backend/loader.js';
-import { scanApiRoutes } from './backend/scanner.js';
+import { scanApiRoutes, scanSpecificFiles } from './backend/scanner.js';
 import { detectParameters } from './backend/parameters.js';
-import { sendRequest } from './backend/post.js'; if (started) {
+import { sendRequest } from './backend/post.js';
+import { aiScanStructure, aiDetectParams } from './backend/aiScanner.js';
+
+if (started) {
   app.quit();
 }
 
@@ -67,6 +70,19 @@ app.whenReady().then(() => {
 
   ipcMain.handle('api:detectParams', async (event, filePath, method, type) => {
     return detectParameters(filePath, method, type);
+  });
+
+  // --- AI SCANNER IPC ---
+  ipcMain.handle('api:aiScanStructure', async (event, projectPath, apiKey) => {
+    return await aiScanStructure(projectPath, apiKey);
+  });
+
+  ipcMain.handle('api:scanSpecificFiles', async (event, projectPath, files, type) => {
+    return scanSpecificFiles(projectPath, files, type);
+  });
+
+  ipcMain.handle('api:aiDetectParams', async (event, projectPath, routePath, method, filePath, apiKey) => {
+    return await aiDetectParams(projectPath, routePath, method, filePath, apiKey);
   });
 
   ipcMain.handle('api:sendRequest', async (event, requestData) => {

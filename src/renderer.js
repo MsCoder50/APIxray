@@ -23,9 +23,20 @@ const responseStatus = document.getElementById('response-status');
 const responseTime = document.getElementById('response-time');
 const responseContent = document.getElementById('response-content');
 
+// AI Elements
+const btnSettings = document.getElementById('btn-settings');
+const settingsModal = document.getElementById('settings-modal');
+const btnCloseSettings = document.getElementById('btn-close-settings');
+const btnSaveSettings = document.getElementById('btn-save-settings');
+const inputApiKey = document.getElementById('input-api-key');
+const btnToggleApiKey = document.getElementById('btn-toggle-api-key');
+const iconEye = document.getElementById('icon-eye');
+const iconEyeOff = document.getElementById('icon-eye-off');
+
 // State
 let currentProject = { path: null, type: null };
 let currentRoute = null;
+let aiKey = localStorage.getItem('api_xray_ai_key') || '';
 
 // Initialization
 function init() {
@@ -36,6 +47,35 @@ function setupEventListeners() {
   btnSelectProject.addEventListener('click', handleSelectProject);
   btnSend.addEventListener('click', handleSendRequest);
   btnAddHeader.addEventListener('click', handleAddHeader);
+
+  if (btnSettings) {
+    btnSettings.addEventListener('click', () => {
+      inputApiKey.value = aiKey;
+      settingsModal.classList.remove('hidden');
+    });
+  }
+  if (btnCloseSettings) btnCloseSettings.addEventListener('click', () => settingsModal.classList.add('hidden'));
+  if (btnSaveSettings) {
+    btnSaveSettings.addEventListener('click', () => {
+      aiKey = inputApiKey.value.trim();
+      localStorage.setItem('api_xray_ai_key', aiKey);
+      settingsModal.classList.add('hidden');
+    });
+  }
+  
+  if (btnToggleApiKey) {
+    btnToggleApiKey.addEventListener('click', () => {
+      if (inputApiKey.type === 'password') {
+        inputApiKey.type = 'text';
+        iconEye.classList.add('hidden');
+        iconEyeOff.classList.remove('hidden');
+      } else {
+        inputApiKey.type = 'password';
+        iconEye.classList.remove('hidden');
+        iconEyeOff.classList.add('hidden');
+      }
+    });
+  }
 
   tabs.forEach(tab => {
     tab.addEventListener('click', () => switchTab(tab.dataset.tab));
@@ -58,7 +98,7 @@ async function handleSelectProject() {
   if (!folderPath) return;
 
   const type = await window.electronAPI.detectProject(folderPath);
-  
+
   if (type === 'other') {
     alert("Could not detect a Next.js or Express project in this folder.");
     return;
@@ -73,17 +113,48 @@ async function handleSelectProject() {
 
 async function loadRoutes() {
   routeList.innerHTML = '<li class="empty-state">Scanning...</li>';
-  
-  const routes = await window.electronAPI.scanRoutes(currentProject.path, currentProject.type);
-  
+
+  let routes = [];
+
+  if (aiKey) {
+    try {
+      routeList.innerHTML = '<li class="empty-state">Analyzing Structure...</li>';
+      const likelyFiles = await window.electronAPI.aiScanStructure(currentProject.path, aiKey);
+
+      if (likelyFiles && likelyFiles.length > 0) {
+        routeList.innerHTML = '<li class="empty-state">Extracting Endpoints...</li>';
+        routes = await window.electronAPI.scanSpecificFiles(currentProject.path, likelyFiles, currentProject.type);
+      }
+    } catch (err) {
+      console.warn("AI Structure scan failed, falling back to full scan:", err);
+    }
+  }
+
+  // Fallback to full regex scan if AI was disabled, failed, or found no likely files
+  if (routes.length === 0) {
+    routeList.innerHTML = '<li class="empty-state">Performing Full Scan...</li>';
+    routes = await window.electronAPI.scanRoutes(currentProject.path, currentProject.type);
+  }
+
   if (routes.length === 0) {
     routeList.innerHTML = '<li class="empty-state">No routes found.</li>';
     return;
   }
 
+  // Deduplicate routes (prevent repeated API endpoints)
+  const uniqueRoutes = [];
+  const seenPaths = new Set();
+  for (const route of routes) {
+    const key = `${route.method}:${route.path}`;
+    if (!seenPaths.has(key)) {
+      seenPaths.add(key);
+      uniqueRoutes.push(route);
+    }
+  }
+
   routeList.innerHTML = '';
-  
-  routes.forEach(route => {
+
+  uniqueRoutes.forEach(route => {
     const li = document.createElement('li');
     li.innerHTML = `
       <span class="route-method method-${route.method}">${route.method}</span>
@@ -109,9 +180,19 @@ async function selectRoute(route, liElement) {
   pathParamsList.innerHTML = '<div class="empty-hint">Loading...</div>';
   bodyAutoForm.innerHTML = '<div class="empty-hint">Loading...</div>';
 
-  // Detect Parameters
-  const params = await window.electronAPI.detectParams(route.file, route.method, currentProject.type);
-  
+  // Detect Parameters (Use AI if key exists, otherwise fallback to standard)
+  let params;
+  if (aiKey) {
+    try {
+      params = await window.electronAPI.aiDetectParams(currentProject.path, route.path, route.method, route.file, aiKey);
+    } catch (err) {
+      console.warn("AI Detect Params Failed, using fallback:", err);
+      params = await window.electronAPI.detectParams(route.file, route.method, currentProject.type);
+    }
+  } else {
+    params = await window.electronAPI.detectParams(route.file, route.method, currentProject.type);
+  }
+
   renderParams(params.query, queryParamsList, 'Query Parameter');
   renderParams(params.params, pathParamsList, 'Path Variable');
   renderParams(params.body, bodyAutoForm, 'Body Field');
@@ -168,13 +249,13 @@ async function handleSendRequest() {
     const pathParams = collectKeyValue(pathParamsList);
     const queryParams = collectKeyValue(queryParamsList);
     const headers = collectKeyValue(headersList);
-    
+
     let body = null;
     const bodyType = document.querySelector('input[name="bodyType"]:checked').value;
     if (bodyType === 'json') {
       try {
         body = bodyRawJson.value ? JSON.parse(bodyRawJson.value) : {};
-      } catch(e) {
+      } catch (e) {
         alert("Invalid JSON in raw body editor.");
         return;
       }
@@ -209,7 +290,7 @@ async function handleSendRequest() {
     }
 
     responseTime.textContent = `Time: ${result.timeTaken || 'N/A'}`;
-    
+
     if (typeof result.data === 'object') {
       responseContent.textContent = JSON.stringify(result.data, null, 2);
     } else {
@@ -249,10 +330,12 @@ function switchTab(tabId) {
 function switchBodyType(type) {
   bodyAutoForm.classList.add('hidden');
   bodyRawJson.classList.add('hidden');
-  
+
   if (type === 'form') bodyAutoForm.classList.remove('hidden');
   if (type === 'json') bodyRawJson.classList.remove('hidden');
 }
 
 // Run
 init();
+
+

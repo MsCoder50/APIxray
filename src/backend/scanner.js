@@ -161,3 +161,51 @@ export function scanApiRoutes(projectPath, type) {
 
   return [];
 }
+
+export function scanSpecificFiles(projectPath, files, type) {
+  const routes = [];
+  
+  for (const file of files) {
+    const filePath = path.join(projectPath, file);
+    if (!fs.existsSync(filePath)) continue;
+
+    if (type === "nextjs") {
+      // Next.js App Router
+      if (filePath.includes("app/api") && (filePath.endsWith("route.js") || filePath.endsWith("route.ts"))) {
+        const routeStr = filePath.split("app/api")[1].replace(/\\/g, "/").replace(/\/?route\.[jt]s$/, "");
+        const methods = detectMethods(filePath);
+        if (methods.length > 0) {
+          for (const method of methods) routes.push({ path: `/api${routeStr}`, method: method, file: filePath });
+        } else {
+          routes.push({ path: `/api${routeStr}`, method: "UNKNOWN", file: filePath });
+        }
+      }
+      // Next.js Pages Router
+      else if (filePath.includes("pages/api") && (filePath.endsWith(".js") || filePath.endsWith(".ts"))) {
+        const routeStr = filePath.split("pages/api")[1].replace(/\\/g, "/").replace(/\.[jt]s$/, "");
+        routes.push({ path: `/api${routeStr}`, method: "ANY", file: filePath });
+      }
+    } 
+    
+    else if (type === "express") {
+      const content = fs.readFileSync(filePath, "utf-8");
+      const regex = /(?:app|router)\.(get|post|put|delete|patch|all)\(["'`](.*?)["'`]/g;
+      let match;
+      while ((match = regex.exec(content)) !== null) {
+        routes.push({ path: match[2], method: match[1].toUpperCase(), file: filePath });
+      }
+      const routeRegex = /(?:app|router)\.route\(["'`](.*?)["'`]\)([\s\S]*?)(?=;|(?:app|router))/g;
+      let routeMatch;
+      while ((routeMatch = routeRegex.exec(content)) !== null) {
+        const pathStr = routeMatch[1];
+        const methodRegex = /\.(get|post|put|delete|patch|all)\(/g;
+        let methodMatch;
+        while ((methodMatch = methodRegex.exec(routeMatch[2])) !== null) {
+          routes.push({ path: pathStr, method: methodMatch[1].toUpperCase(), file: filePath });
+        }
+      }
+    }
+  }
+
+  return routes;
+}

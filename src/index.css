@@ -383,3 +383,38 @@ body {
   text-align: center;
   text-transform: uppercase;
 }
+
+/* AI BUTTON & MODAL */
+.primary-ai {
+  background: linear-gradient(135deg, #a855f7, #6366f1);
+  color: white;
+  border: none;
+}
+.primary-ai:hover {
+  background: linear-gradient(135deg, #9333ea, #4f46e5);
+}
+
+.modal {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  width: 400px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+.modal-content h3 {
+  margin-bottom: 8px;
+  font-size: 16px;
+  color: var(--text-primary);
+}

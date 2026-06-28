@@ -9,9 +9,8 @@ export async function sendRequest({
   try {
     let finalUrl = url;
 
-    // 1. Ensure URL has a protocol (required for fetch)
+    // Ensure protocol
     if (!finalUrl.startsWith('http://') && !finalUrl.startsWith('https://')) {
-      // If it starts with a slash, we might need a base URL, but we'll assume localhost for local testing
       if (finalUrl.startsWith('/')) {
         finalUrl = `http://localhost:3000${finalUrl}`;
       } else {
@@ -19,13 +18,13 @@ export async function sendRequest({
       }
     }
 
-    // 2. Process Path Parameters (e.g., replace :userId with actual ID)
+    // Process path params
     for (const [key, value] of Object.entries(pathParams)) {
       finalUrl = finalUrl.replace(`:${key}`, encodeURIComponent(value))
                          .replace(`{${key}}`, encodeURIComponent(value));
     }
 
-    // 3. Process Query Parameters (e.g., ?search=test&limit=10)
+    // Process query params
     if (Object.keys(queryParams).length > 0) {
       const urlObj = new URL(finalUrl);
       for (const [key, value] of Object.entries(queryParams)) {
@@ -36,13 +35,13 @@ export async function sendRequest({
       finalUrl = urlObj.toString();
     }
 
-    // 4. Prepare Fetch Options
+    // Prepare fetch options
     const fetchOptions = {
       method: method.toUpperCase(),
       headers: { ...headers },
     };
 
-    // 5. Process Body
+    // Process body
     if (body && !['GET', 'HEAD'].includes(fetchOptions.method)) {
       if (typeof body === 'object') {
         fetchOptions.body = JSON.stringify(body);
@@ -54,12 +53,12 @@ export async function sendRequest({
       }
     }
 
-    // 6. Execute Request and Measure Time
+    // Execute
     const startTime = Date.now();
     const response = await fetch(finalUrl, fetchOptions);
     const endTime = Date.now();
 
-    // 7. Parse Response Data
+    // Parse response
     const timeTaken = endTime - startTime;
     const responseHeaders = Object.fromEntries(response.headers.entries());
     
@@ -71,7 +70,6 @@ export async function sendRequest({
     } else if (contentType.includes("text/")) {
       responseData = await response.text();
     } else {
-      // Fallback for blobs, HTML, or empty responses
       responseData = await response.text();
     }
 

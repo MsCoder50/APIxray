@@ -17,12 +17,20 @@
       <!-- SIDEBAR -->
       <aside class="sidebar">
         <div class="sidebar-header">
-          <button id="btn-select-project" class="btn primary">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a2 2 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4H2.19zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139h12.988l-.004-.01A1 1 0 0 0 13.5 2H9.828a1 1 0 0 0-.707.293L8.293 3h-.586l-.828-.828z"/>
-            </svg>
-            Select Project
-          </button>
+          <div style="display: flex; gap: 8px; width: 100%;">
+            <button id="btn-select-project" class="btn primary" style="flex: 1; padding: 8px 4px; font-size: 12px;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a2 2 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4H2.19zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139h12.988l-.004-.01A1 1 0 0 0 13.5 2H9.828a1 1 0 0 0-.707.293L8.293 3h-.586l-.828-.828z"/>
+              </svg>
+              Select Project
+            </button>
+            <button id="btn-settings" class="btn secondary" style="padding: 8px; display: flex; align-items: center; justify-content: center;" title="AI Settings">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+            </button>
+          </div>
           <div id="project-type-badge" class="badge hidden"></div>
         </div>
         <div class="sidebar-content">
@@ -113,6 +121,33 @@
         </section>
 
       </main>
+    </div>
+    
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="modal hidden">
+      <div class="modal-content">
+        <h3>AI Configuration</h3>
+        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">Enter your Google Gemini API Key to enable AI Deep Scanning.</p>
+        <div style="position: relative; width: 100%; margin-bottom: 16px;">
+          <input type="password" id="input-api-key" placeholder="AIzaSy..." class="kv-val" style="width: 100%; padding-right: 32px; height: 32px;" />
+          <button id="btn-toggle-api-key" type="button" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-secondary); padding: 0; display: flex; align-items: center; justify-content: center;">
+            <svg id="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            <svg id="icon-eye-off" class="hidden" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+              <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path>
+              <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path>
+              <line x1="2" y1="2" x2="22" y2="22"></line>
+            </svg>
+          </button>
+        </div>
+        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+          <button id="btn-close-settings" class="btn secondary">Cancel</button>
+          <button id="btn-save-settings" class="btn primary">Save</button>
+        </div>
+      </div>
     </div>
     <script type="module" src="/src/renderer.js"></script>
   </body>
