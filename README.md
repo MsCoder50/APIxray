@@ -17,8 +17,9 @@
 
 ## 🚀 Features
 
-- **Auto-Discovery:** Just select your project folder. APIxray automatically detects your framework and scans for API routes.
-- **Smart Parameter Extraction:** Automatically extracts required query parameters, path variables, and body fields from your code.
+- **Hybrid AI Scanning Engine:** Optionally integrate Google Gemini to instantly map complex project structures and deeply extract nested query, path, and body parameters with incredible precision.
+- **Auto-Discovery:** Just select your project folder. APIxray automatically detects your framework and scans for API routes using blazing-fast local Regex.
+- **Smart Parameter Extraction:** Automatically extracts required query parameters, path variables, and body fields from your code using AST/Regex or advanced AI reasoning.
 - **Modern Interface:** Built with Vite and Electron for a snappy, responsive UI.
 - **No Manual Configuration:** Spend less time writing endpoint URLs and headers and more time testing.
 - **Cross-Platform:** Available for Linux Only.
@@ -42,15 +43,15 @@ sequenceDiagram
     Filesystem-->>Main: Return framework type
     Main-->>Renderer: Return Framework (Next.js/Express)
     
-    Renderer->>Main: IPC: api:scanRoutes(path, type)
+    Renderer->>Main: IPC: api:scanRoutes(path, type) OR aiScanStructure()
     Main->>Filesystem: Scan directories (e.g. /app/api)
     Filesystem-->>Main: Return route files
     Main-->>Renderer: Return structured route list
     
     User->>Renderer: Click Route
-    Renderer->>Main: IPC: api:detectParams(file, method)
-    Main->>Filesystem: Read Route Source Code
-    Main->>Main: Parse AST / Regex extraction
+    Renderer->>Main: IPC: api:detectParams() OR aiDetectParams()
+    Main->>Filesystem: Read Route Source Code + Local Imports
+    Main->>Main: Parse AST / Regex / Gemini AI extraction
     Main-->>Renderer: Return Params (Query, Path, Body)
     
     User->>Renderer: Fill Params & Send
