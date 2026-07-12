@@ -26,11 +26,7 @@ module.exports = {
           icon: './src/assets/images/icon.png'
         }
       },
-    },
-    {
-      name: '@electron-forge/maker-rpm',
-      config: {},
-    },
+    }
   ],
   plugins: [
     {
