@@ -20,6 +20,11 @@
 - **Hybrid AI Scanning Engine:** Optionally integrate Google Gemini to instantly map complex project structures and deeply extract nested query, path, and body parameters with incredible precision.
 - **Auto-Discovery:** Just select your project folder. APIxray automatically detects your framework and scans for API routes using blazing-fast local Regex.
 - **Smart Parameter Extraction:** Automatically extracts required query parameters, path variables, and body fields from your code using AST/Regex or advanced AI reasoning.
+- **Flexible Request Methods:** Built-in dropdown selector supporting GET, POST, PUT, PATCH, DELETE, HEAD, and OPTIONS HTTP methods.
+- **Multi-View Response Display:** View API responses in three formats:
+  - **Raw** - Original response exactly as received
+  - **JSON** - Pretty-printed and formatted JSON with full syntax highlighting
+  - **HTML** - Renders HTML responses in a sandboxed iframe for visual inspection
 - **Modern Interface:** Built with Vite and Electron for a snappy, responsive UI.
 - **No Manual Configuration:** Spend less time writing endpoint URLs and headers and more time testing.
 - **Cross-Platform:** Available for Linux Only.
@@ -81,7 +86,25 @@ graph TD
 
 ---
 
-## 📦 Downloads & Releases
+## � Changelog
+
+### v2.1.0 (Latest)
+
+**New Features:**
+- ✨ Added HTTP method dropdown selector (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS)
+- ✨ Multi-view response display: Raw, JSON, and HTML rendering modes
+- ✨ HTML responses now render in a sandboxed iframe for safe visual inspection
+- ✨ Improved response body styling with proper scrolling and padding
+
+**Bug Fixes:**
+- 🐛 Fixed response body text wrapping when content is too large
+- 🐛 Resolved padding and overflow issues in response viewer
+- 🐛 Fixed method selection not persisting when switching between routes
+- 🐛 Improved JSON parsing error handling in response viewer
+
+---
+
+## �📦 Downloads & Releases
 
 Pre-compiled binaries are available for Windows and Linux. 
 *(If you are hosting this on GitHub, upload the built `.deb` files to the **Releases** tab on GitHub).*

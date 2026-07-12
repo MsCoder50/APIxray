@@ -13,10 +13,16 @@ if (started) {
   app.quit();
 }
 
+// Set App User Model ID for Windows Taskbar grouping and custom icon
+if (process.platform === 'win32') {
+  app.setAppUserModelId('com.mscoder.apixray');
+}
+
 const createWindow = () => {
+  const iconFile = (process.platform === 'win32' && app.isPackaged) ? 'icon.ico' : 'icon.png';
   const iconPath = app.isPackaged
-    ? path.join(process.resourcesPath, 'icon.png')
-    : path.join(app.getAppPath(), 'src/assets/images/icon.png');
+    ? path.join(process.resourcesPath, iconFile)
+    : path.join(app.getAppPath(), 'src/assets/images', iconFile);
 
   const appIcon = nativeImage.createFromPath(iconPath);
 

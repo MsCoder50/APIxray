@@ -23,6 +23,13 @@ const responseStatus = document.getElementById('response-status');
 const responseTime = document.getElementById('response-time');
 const responseContent = document.getElementById('response-content');
 
+// Response View Modes
+const viewModeButtons = document.querySelectorAll('.view-mode-btn');
+const responseModes = document.querySelectorAll('.response-mode');
+const responseJsonContent = document.getElementById('response-json-content');
+const responseHtmlFrame = document.getElementById('response-html-frame');
+let lastResponseData = null; // Store raw response for switching modes
+
 // AI Elements
 const btnSettings = document.getElementById('btn-settings');
 const settingsModal = document.getElementById('settings-modal');
@@ -83,6 +90,11 @@ function setupEventListeners() {
 
   bodyOptions.forEach(radio => {
     radio.addEventListener('change', (e) => switchBodyType(e.target.value));
+  });
+
+  // View Mode Buttons
+  viewModeButtons.forEach(btn => {
+    btn.addEventListener('click', () => switchResponseMode(btn.dataset.mode));
   });
 
   // Setup initial remove button for header
@@ -172,8 +184,7 @@ async function selectRoute(route, liElement) {
 
   currentRoute = route;
   requestUrl.value = `http://localhost:3000${route.path}`; // Default to localhost:3000
-  requestMethodBadge.textContent = route.method;
-  requestMethodBadge.className = `method-badge method-${route.method}`;
+  requestMethodBadge.value = route.method;
 
   // Reset inputs
   queryParamsList.innerHTML = '<div class="empty-hint">Loading...</div>';
@@ -265,7 +276,7 @@ async function handleSendRequest() {
 
     const requestData = {
       url: requestUrl.value,
-      method: requestMethodBadge.textContent,
+      method: requestMethodBadge.value,
       pathParams,
       queryParams,
       headers,
@@ -291,11 +302,30 @@ async function handleSendRequest() {
 
     responseTime.textContent = `Time: ${result.timeTaken || 'N/A'}`;
 
+    // Store raw response data
+    lastResponseData = result.data;
+
+    // Render in Raw mode
     if (typeof result.data === 'object') {
       responseContent.textContent = JSON.stringify(result.data, null, 2);
     } else {
       responseContent.textContent = result.data || result.error || "No response data.";
     }
+
+    // Render in JSON mode
+    try {
+      let jsonData = result.data;
+      if (typeof result.data === 'string') {
+        jsonData = JSON.parse(result.data);
+      }
+      responseJsonContent.textContent = JSON.stringify(jsonData, null, 2);
+    } catch (e) {
+      responseJsonContent.textContent = "Cannot parse as JSON: " + (typeof result.data === 'string' ? result.data : JSON.stringify(result.data));
+    }
+
+    // Render in HTML mode
+    const htmlContent = typeof result.data === 'string' ? result.data : JSON.stringify(result.data, null, 2);
+    renderHtmlResponse(htmlContent);
 
   } catch (err) {
     responseContent.textContent = `Execution Error: ${err.message}`;
@@ -333,6 +363,96 @@ function switchBodyType(type) {
 
   if (type === 'form') bodyAutoForm.classList.remove('hidden');
   if (type === 'json') bodyRawJson.classList.remove('hidden');
+}
+
+function switchResponseMode(mode) {
+  // Update button states
+  viewModeButtons.forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.dataset.mode === mode) {
+      btn.classList.add('active');
+    }
+  });
+
+  // Update visible pane
+  responseModes.forEach(pane => {
+    pane.classList.remove('active');
+  });
+  document.getElementById(`response-${mode}`).classList.add('active');
+}
+
+function renderHtmlResponse(content) {
+  try {
+    // Try to parse as JSON first and pretty print it as HTML if needed
+    let htmlContent = content;
+    
+    // Check if content looks like JSON
+    if (content.trim().startsWith('{') || content.trim().startsWith('[')) {
+      try {
+        const parsed = JSON.parse(content);
+        htmlContent = `<pre>${escapeHtml(JSON.stringify(parsed, null, 2))}</pre>`;
+      } catch (e) {
+        // Not valid JSON, treat as raw HTML
+        htmlContent = content;
+      }
+    }
+
+    // Create a safe HTML document
+    const htmlDocument = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0f111a;
+            color: #e2e8f0;
+            padding: 10px;
+            line-height: 1.5;
+          }
+          pre {
+            background: #1e2233;
+            border: 1px solid #2d3348;
+            border-radius: 4px;
+            padding: 10px;
+            overflow-x: auto;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+          }
+          a { color: #8898ff; text-decoration: none; }
+          a:hover { text-decoration: underline; }
+          img { max-width: 100%; height: auto; border-radius: 4px; margin: 10px 0; }
+          table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+          th, td { border: 1px solid #2d3348; padding: 8px; text-align: left; }
+          th { background: #1e2233; font-weight: 600; }
+          h1, h2, h3, h4, h5, h6 { margin-top: 16px; margin-bottom: 8px; }
+          code { background: #1e2233; padding: 2px 6px; border-radius: 2px; font-family: monospace; }
+        </style>
+      </head>
+      <body>
+        ${htmlContent}
+      </body>
+      </html>
+    `;
+
+    responseHtmlFrame.srcdoc = htmlDocument;
+  } catch (err) {
+    responseHtmlFrame.srcdoc = `<html><body style="color: #ef4444; padding: 10px; font-family: monospace;">Error rendering HTML: ${escapeHtml(err.message)}</body></html>`;
+  }
+}
+
+function escapeHtml(text) {
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, m => map[m]);
 }
 
 // Run

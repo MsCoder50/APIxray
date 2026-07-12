@@ -47,7 +47,15 @@
         <!-- REQUEST TOPBAR -->
         <header class="request-topbar">
           <div class="url-input-group">
-            <div id="request-method" class="method-badge">GET</div>
+            <select id="request-method" class="method-dropdown">
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="PUT">PUT</option>
+              <option value="PATCH">PATCH</option>
+              <option value="DELETE">DELETE</option>
+              <option value="HEAD">HEAD</option>
+              <option value="OPTIONS">OPTIONS</option>
+            </select>
             <input type="text" id="request-url" placeholder="Enter request URL (e.g. http://localhost:3000/api/...)" />
             <button id="btn-send" class="btn primary">Send</button>
           </div>
@@ -109,14 +117,29 @@
         <!-- RESPONSE VIEWER -->
         <section class="response-viewer">
           <header class="response-header">
-            <h3>Response</h3>
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <h3>Response</h3>
+              <div class="view-mode-buttons">
+                <button class="view-mode-btn active" data-mode="raw">Raw</button>
+                <button class="view-mode-btn" data-mode="json">JSON</button>
+                <button class="view-mode-btn" data-mode="html">HTML</button>
+              </div>
+            </div>
             <div class="response-meta">
               <span id="response-status" class="meta-item">Status: ---</span>
               <span id="response-time" class="meta-item">Time: --- ms</span>
             </div>
           </header>
           <div class="response-body">
-            <pre><code id="response-content">Hit Send to get a response...</code></pre>
+            <div id="response-raw" class="response-mode active">
+              <pre><code id="response-content">Hit Send to get a response...</code></pre>
+            </div>
+            <div id="response-json" class="response-mode">
+              <pre><code id="response-json-content">Hit Send to get a response...</code></pre>
+            </div>
+            <div id="response-html" class="response-mode">
+              <iframe id="response-html-frame" class="html-frame" sandbox="allow-same-origin allow-scripts allow-popups allow-forms" srcdoc="<html><head><style>body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 10px; background: #0f111a; color: #e2e8f0; }</style></head><body>Hit Send to get a response...</body></html>"></iframe>
+            </div>
           </div>
         </section>
 

@@ -4,9 +4,10 @@ const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 module.exports = {
   packagerConfig: {
     asar: true,
-    icon: './src/assets/images/icon.png',
+    icon: './src/assets/images/icon',
     extraResource: [
-      './src/assets/images/icon.png'
+      './src/assets/images/icon.png',
+      './src/assets/images/icon.ico'
     ]
   },
   rebuildConfig: {},
@@ -14,10 +15,11 @@ module.exports = {
     {
       name: '@electron-forge/maker-squirrel',
       config: {},
+      platforms: ['win32'],
     },
     {
       name: '@electron-forge/maker-zip',
-      platforms: ['darwin'],
+      platforms: ['darwin', 'win32'],
     },
     {
       name: '@electron-forge/maker-deb',
@@ -67,4 +69,37 @@ module.exports = {
       [FuseV1Options.OnlyLoadAppFromAsar]: true,
     }),
   ],
+  hooks: {
+    postPackage: async (forgeConfig, options) => {
+      try {
+        const { load } = require('resedit/cjs');
+        const fs = require('fs-extra');
+        const path = require('path');
+        for (const outputPath of options.outputPaths) {
+          const exePath = path.join(outputPath, 'APIxray.exe');
+          const iconPath = path.resolve('src/assets/images/icon.ico');
+          if (await fs.pathExists(exePath) && await fs.pathExists(iconPath)) {
+            const resedit = await load();
+            const exeData = await fs.readFile(exePath);
+            const exe = resedit.NtExecutable.from(exeData);
+            const res = resedit.NtExecutableResource.from(exe);
+            const existingIconGroups = resedit.Resource.IconGroupEntry.fromEntries(res.entries);
+            if (existingIconGroups.length > 0) {
+              const iconFile = resedit.Data.IconFile.from(await fs.readFile(iconPath));
+              resedit.Resource.IconGroupEntry.replaceIconsForResource(
+                res.entries,
+                existingIconGroups[0].id,
+                existingIconGroups[0].lang,
+                iconFile.icons.map((item) => item.data)
+              );
+              res.outputResource(exe);
+              await fs.writeFile(exePath, Buffer.from(exe.generate()));
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Could not post-patch executable icon:', err.message);
+      }
+    },
+  },
 };
