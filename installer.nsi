@@ -7,15 +7,15 @@
 
 ; General Definitions
 Name "APIxray"
-OutFile "out\make\APIxray-2.1.0-Setup.exe"
+OutFile "out/make/APIxray-2.1.0-Setup.exe"
 InstallDir "$LOCALAPPDATA\Programs\APIxray"
 InstallDirRegKey HKCU "Software\APIxray" "Install_Dir"
 RequestExecutionLevel user
 
 ; Interface Configuration
 !define MUI_ABORTWARNING
-!define MUI_ICON "src\assets\images\icon.ico"
-!define MUI_UNICON "src\assets\images\icon.ico"
+!define MUI_ICON "src/assets/images/icon.ico"
+!define MUI_UNICON "src/assets/images/icon.ico"
 
 ; Installer Pages
 !insertmacro MUI_PAGE_WELCOME
@@ -41,7 +41,7 @@ Section "APIxray Core" SecAPIxray
     SetOutPath "$INSTDIR"
     
     ; Copy all packaged files into installation directory
-    File /r "out\APIxray-win32-x64\*.*"
+    File /r "out/APIxray-win32-x64/*"
 
     ; Create Desktop Shortcut with explicit custom icon
     CreateShortCut "$DESKTOP\APIxray.lnk" "$INSTDIR\APIxray.exe" "" "$INSTDIR\resources\icon.ico" 0

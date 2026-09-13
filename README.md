@@ -27,7 +27,7 @@
   - **HTML** - Renders HTML responses in a sandboxed iframe for visual inspection
 - **Modern Interface:** Built with Vite and Electron for a snappy, responsive UI.
 - **No Manual Configuration:** Spend less time writing endpoint URLs and headers and more time testing.
-- **Cross-Platform:** Available for Linux Only.
+- **Cross-Platform:** Available for Windows and Linux.
 
 ---
 
@@ -155,8 +155,12 @@ npm start
 
 APIxray uses Electron Forge to create cross-platform executables.
 
-**To build for Windows (.exe):**
-*(Note: Best run on a Windows machine)*
+**To build Windows Setup Installer (`.exe`):**
+```bash
+npm run build:installer
+```
+
+**To build for Windows with Electron Forge:**
 ```bash
 npm run make -- --platform=win32
 ```

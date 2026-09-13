@@ -1,11 +1,7 @@
 {
   "name": "APIxray",
   "productName": "APIxray",
-<<<<<<< HEAD
-  "version": "2.0.0",
-=======
   "version": "2.1.0",
->>>>>>> 287e9ab (updated description of project and version)
   "description": "APIxray automatically scans your Next.js and Express projects using AI to detect API routes and parameters for instant testing.",
   "main": ".vite/build/main.js",
   "private": true,
@@ -13,7 +9,7 @@
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
-    "build:installer": "makensis installer.nsi",
+    "build:installer": "if command -v makensis >/dev/null 2>&1; then makensis installer.nsi; else NSISDIR=\"$(pwd)/tools/nsis/usr/share/nsis\" ./tools/nsis/usr/bin/makensis installer.nsi; fi",
     "publish": "electron-forge publish",
     "lint": "echo \"No linting configured\""
   },

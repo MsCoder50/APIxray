@@ -16,6 +16,7 @@ dist-ssr/
 # Electron Forge / Vite build outputs
 /out
 .vite/
+tools/
 
 # Editor directories and files
 .vscode/*
