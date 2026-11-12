@@ -4,7 +4,7 @@
 
 ---
 
-## 📸 Screenshots
+## Screenshots
 
 <p align="center">
   <img src="screenshots/1.png" width="45%" alt="APIxray Workspace" />
@@ -15,7 +15,7 @@
 
 ---
 
-## 🚀 Features
+## Features
 
 - **Multi-Framework Auto-Discovery:** Instant, automatic detection of your backend framework: **Next.js**, **Express**, **FastAPI**, and **Flask**. No tedious manual route configuration required.
 - **Hybrid AI Scanning Engine:** Optionally integrate Google Gemini to map complex, non-standard project structures and deeply extract nested query, path, and body parameters with high precision.
@@ -31,7 +31,7 @@
 
 ---
 
-## 🛠️ Architecture Flow
+## Architecture Flow
 
 The core mechanism of APIxray involves static code analysis paired with an Electron IPC bridge. Here is how it functions under the hood:
 
@@ -66,7 +66,7 @@ sequenceDiagram
     Renderer->>User: Display Result
 ```
 
-## 🌊 User Journey Flow
+## User Journey Flow
 
 ```mermaid
 graph TD
@@ -86,45 +86,44 @@ graph TD
 
 ---
 
-## � Changelog
+## Changelog
 
 ### v2.2.0 (Latest)
 
 **New Features:**
-- 🐍 **FastAPI Support:** Automatic discovery of FastAPI routes, APIRouter prefixes, path variables (`{param}`), function signature query params, and Pydantic request models (`BaseModel`).
-- 🌶️ **Flask Support:** Full scanning for Flask route decorators (`@app.route`, `@bp.route`, Flask 2.0+ `@app.get/post`), Blueprint URL prefixes, converter path variables (`<int:id>`, `<string:name>`), and `request.args`/`request.get_json()` parameters.
-- 🔍 **Python Project Detection:** Seamless auto-detection via `requirements.txt`, `Pipfile`, `pyproject.toml`, `setup.py`, or root-level framework imports.
-- ⚡ **Optimized Directory Walking:** Smart exclusion of Python virtual environments (`.venv`, `venv`, `env`), cache directories (`__pycache__`, `.pytest_cache`), and build artifacts for blazing-fast scanning.
-- 🔌 **Dynamic Port Assignment:** Automatically sets the default request port to `8000` for FastAPI, `5000` for Flask, and `3000` for Next.js/Express.
-- 🤖 **Python AI Deep Scanning:** Extended Gemini structure scanning and relative Python module import resolution (`from . import ...`, `from .models import ...`) for comprehensive parameter detection.
+- **FastAPI Support:** Automatic discovery of FastAPI routes, APIRouter prefixes, path variables (`{param}`), function signature query params, and Pydantic request models (`BaseModel`).
+- **Flask Support:** Full scanning for Flask route decorators (`@app.route`, `@bp.route`, Flask 2.0+ `@app.get/post`), Blueprint URL prefixes, converter path variables (`<int:id>`, `<string:name>`), and `request.args`/`request.get_json()` parameters.
+- **Python Project Detection:** Seamless auto-detection via `requirements.txt`, `Pipfile`, `pyproject.toml`, `setup.py`, or root-level framework imports.
+- **Optimized Directory Walking:** Smart exclusion of Python virtual environments (`.venv`, `venv`, `env`), cache directories (`__pycache__`, `.pytest_cache`), and build artifacts for blazing-fast scanning.
+- **Dynamic Port Assignment:** Automatically sets the default request port to `8000` for FastAPI, `5000` for Flask, and `3000` for Next.js/Express.
+- **Python AI Deep Scanning:** Extended Gemini structure scanning and relative Python module import resolution (`from . import ...`, `from .models import ...`) for comprehensive parameter detection.
 
 ### v2.1.0
 
 **New Features:**
-- ✨ Added HTTP method dropdown selector (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS)
-- ✨ Multi-view response display: Raw, JSON, and HTML rendering modes
-- ✨ HTML responses now render in a sandboxed iframe for safe visual inspection
-- ✨ Improved response body styling with proper scrolling and padding
+- Added HTTP method dropdown selector (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS)
+- Multi-view response display: Raw, JSON, and HTML rendering modes
+- HTML responses now render in a sandboxed iframe for safe visual inspection
+- Improved response body styling with proper scrolling and padding
 
 **Bug Fixes:**
-- 🐛 Fixed response body text wrapping when content is too large
-- 🐛 Resolved padding and overflow issues in response viewer
-- 🐛 Fixed method selection not persisting when switching between routes
-- 🐛 Improved JSON parsing error handling in response viewer
+- Fixed response body text wrapping when content is too large
+- Resolved padding and overflow issues in response viewer
+- Fixed method selection not persisting when switching between routes
+- Improved JSON parsing error handling in response viewer
 
 ---
 
-## �📦 Downloads & Releases
+## Downloads & Releases
 
-Pre-compiled binaries are available for Windows and Linux. 
-*(If you are hosting this on GitHub, upload the built `.deb` files to the **Releases** tab on GitHub).*
+Pre-compiled binaries are available for Windows and Linux:
 
 - **[Windows (.exe) Setup Installer](https://github.com/MsCoder50/APIxray/releases/latest)**
 - **[Linux (.deb) Package](https://github.com/MsCoder50/APIxray/releases/latest)**
 
 ---
 
-## 💻 How to Use
+## How to Use
 
 1. **Launch the App:** Open the APIxray application.
 2. **Select Project:** Click the **Select Project Folder** button at the top left.
@@ -135,7 +134,7 @@ Pre-compiled binaries are available for Windows and Linux.
 
 ---
 
-## 🛠️ Development & Building from Source
+## Development & Building from Source
 
 To run APIxray locally or build it for your own platform, follow these steps:
 
@@ -186,13 +185,13 @@ The compiled binaries will be output to the `out/` directory in your project fol
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Whether it's adding support for new backend frameworks (like NestJS, Fastify, Django), fixing bugs, or improving the UI.
 
 Please see our [CONTRIBUTING.md](./CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](./LICENSE.md) file for details.
 
