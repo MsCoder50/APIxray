@@ -112,7 +112,7 @@ async function handleSelectProject() {
   const type = await window.electronAPI.detectProject(folderPath);
 
   if (type === 'other') {
-    alert("Could not detect a Next.js or Express project in this folder.");
+    alert("Could not detect a supported project (Next.js, Express, FastAPI, or Flask) in this folder.");
     return;
   }
 
@@ -183,7 +183,10 @@ async function selectRoute(route, liElement) {
   liElement.classList.add('active');
 
   currentRoute = route;
-  requestUrl.value = `http://localhost:3000${route.path}`; // Default to localhost:3000
+  let defaultPort = 3000;
+  if (currentProject.type === 'fastapi') defaultPort = 8000;
+  else if (currentProject.type === 'flask') defaultPort = 5000;
+  requestUrl.value = `http://localhost:${defaultPort}${route.path}`;
   requestMethodBadge.value = route.method;
 
   // Reset inputs

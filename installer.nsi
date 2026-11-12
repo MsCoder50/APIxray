@@ -7,7 +7,7 @@
 
 ; General Definitions
 Name "APIxray"
-OutFile "out/make/APIxray-2.1.0-Setup.exe"
+OutFile "out/make/APIxray-2.2.0-Setup.exe"
 InstallDir "$LOCALAPPDATA\Programs\APIxray"
 InstallDirRegKey HKCU "Software\APIxray" "Install_Dir"
 RequestExecutionLevel user
@@ -57,7 +57,7 @@ Section "APIxray Core" SecAPIxray
     ; Register in Windows "Apps & features" / "Add or Remove Programs"
     WriteRegStr HKCU "Software\APIxray" "Install_Dir" "$INSTDIR"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\APIxray" "DisplayName" "APIxray"
-    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\APIxray" "DisplayVersion" "2.1.0"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\APIxray" "DisplayVersion" "2.2.0"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\APIxray" "Publisher" "MsCoder50"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\APIxray" "DisplayIcon" "$INSTDIR\resources\icon.ico,0"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\APIxray" "UninstallString" '"$INSTDIR\Uninstall.exe"'

@@ -1,8 +1,8 @@
 {
   "name": "APIxray",
   "productName": "APIxray",
-  "version": "2.1.0",
-  "description": "APIxray automatically scans your Next.js and Express projects using AI to detect API routes and parameters for instant testing.",
+  "version": "2.2.0",
+  "description": "APIxray automatically scans your Next.js, Express, FastAPI, and Flask projects using AI to detect API routes and parameters for instant testing.",
   "main": ".vite/build/main.js",
   "private": true,
   "scripts": {

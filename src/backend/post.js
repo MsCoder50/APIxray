@@ -21,7 +21,8 @@ export async function sendRequest({
     // Process path params
     for (const [key, value] of Object.entries(pathParams)) {
       finalUrl = finalUrl.replace(`:${key}`, encodeURIComponent(value))
-                         .replace(`{${key}}`, encodeURIComponent(value));
+                         .replace(`{${key}}`, encodeURIComponent(value))
+                         .replace(new RegExp(`<(?:[a-zA-Z0-9_]+:)?${key}>`, 'g'), encodeURIComponent(value));
     }
 
     // Process query params

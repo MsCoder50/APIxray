@@ -5,7 +5,11 @@ import { GoogleGenAI } from '@google/genai';
 // Get Flat File Paths
 function getFilePaths(dir, basePath, currentDepth = 0, maxDepth = 4) {
   if (currentDepth > maxDepth) return [];
-  const ignored = new Set(['node_modules', '.git', 'dist', 'build', 'out', '.vite', '.next', 'public', 'assets', 'components', 'styles', 'hooks', 'test', 'tests', 'docs']);
+  const ignored = new Set([
+    'node_modules', '.git', 'dist', 'build', 'out', '.vite', '.next', '.nuxt',
+    'public', 'assets', 'components', 'styles', 'hooks', 'test', 'tests', 'docs',
+    'venv', '.venv', 'env', '__pycache__', '.pytest_cache', '.mypy_cache', 'eggs', '.eggs'
+  ]);
   let paths = [];
   
   try {
@@ -19,7 +23,7 @@ function getFilePaths(dir, basePath, currentDepth = 0, maxDepth = 4) {
       if (stat.isDirectory()) {
         paths = paths.concat(getFilePaths(fullPath, basePath, currentDepth + 1, maxDepth));
       } else {
-        if (item.endsWith('.js') || item.endsWith('.ts')) {
+        if (item.endsWith('.js') || item.endsWith('.ts') || item.endsWith('.py')) {
           paths.push(path.relative(basePath, fullPath));
         }
       }
@@ -39,9 +43,9 @@ export async function aiScanStructure(projectPath, apiKey) {
 
   const prompt = `
 You are an expert API backend developer. 
-Analyze the following list of files and identify the ones that most likely contain backend API routes/endpoints (e.g., Express routers, Next.js app/api or pages/api).
+Analyze the following list of files and identify the ones that most likely contain backend API routes/endpoints (e.g., Express routers, Next.js app/api or pages/api, FastAPI routers, Flask blueprints/apps).
 Return ONLY a strictly formatted JSON array of file paths. Do not include markdown formatting.
-Example: ["src/routes/users.js", "app/api/auth/route.ts"]
+Example: ["src/routes/users.js", "app/api/auth/route.ts", "routers/items.py"]
 
 Project Files:
 ${filesList}
@@ -73,11 +77,11 @@ ${filesList}
 function getLocalImportsContext(filePath, code) {
   const dir = path.dirname(filePath);
   let context = "";
-  
+  const processed = new Set();
+
+  // 1. JS/TS Imports: require('./foo') or from './foo'
   const importRegex = /(?:require\(['"](\.[^'"]+)['"]\))|(?:from\s+['"](\.[^'"]+)['"])/g;
   let match;
-  const processed = new Set();
-  
   while ((match = importRegex.exec(code)) !== null) {
     let importPath = match[1] || match[2];
     if (!importPath) continue;
@@ -99,6 +103,51 @@ function getLocalImportsContext(filePath, code) {
       console.error('Failed to read imported file', targetFile);
     }
   }
+
+  // 2. Python Imports: from .models import User or from . import schemas
+  const pyImportRegex = /from\s+(\.+[a-zA-Z0-9_\.]*)\s+import/g;
+  let pyMatch;
+  while ((pyMatch = pyImportRegex.exec(code)) !== null) {
+    const rawPyPath = pyMatch[1];
+    if (!rawPyPath || processed.has(rawPyPath)) continue;
+    processed.add(rawPyPath);
+
+    // Convert relative dots: '.' -> './', '..' -> '../', '.models' -> './models'
+    const leadingDots = rawPyPath.match(/^\.+/)[0];
+    const subModule = rawPyPath.slice(leadingDots.length).replace(/\./g, '/');
+    let relFsPath = '';
+    if (leadingDots === '.') {
+      relFsPath = subModule ? `./${subModule}` : './';
+    } else {
+      const upLevels = '../'.repeat(leadingDots.length - 1);
+      relFsPath = subModule ? `${upLevels}${subModule}` : upLevels;
+    }
+
+    let targetFile = path.resolve(dir, relFsPath);
+    if (!fs.existsSync(targetFile)) {
+      if (fs.existsSync(targetFile + '.py')) {
+        targetFile += '.py';
+      } else if (fs.existsSync(path.join(targetFile, '__init__.py'))) {
+        targetFile = path.join(targetFile, '__init__.py');
+      } else {
+        continue;
+      }
+    } else if (fs.statSync(targetFile).isDirectory()) {
+      if (fs.existsSync(path.join(targetFile, '__init__.py'))) {
+        targetFile = path.join(targetFile, '__init__.py');
+      } else {
+        continue;
+      }
+    }
+
+    try {
+      const importedCode = fs.readFileSync(targetFile, 'utf-8');
+      context += `\n--- Imported Python File: ${rawPyPath} ---\n${importedCode}\n`;
+    } catch (e) {
+      console.error('Failed to read imported Python file', targetFile);
+    }
+  }
+
   return context;
 }
 

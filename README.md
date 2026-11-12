@@ -1,6 +1,6 @@
 # APIxray
 
-**APIxray** is a modern, fast, Postman-like desktop application built with Electron, Vite, and JavaScript. It automatically scans your backend projects (Next.js, Express) to instantly discover API routes and their required parameters (path, query, body), eliminating the need for manual endpoint configuration. 
+**APIxray** is a modern, fast, Postman-like desktop application built with Electron, Vite, and JavaScript. It automatically scans your backend projects (Next.js, Express, FastAPI, and Flask) to instantly discover API routes and their required parameters (path, query, body), eliminating the need for manual endpoint configuration. 
 
 ---
 
@@ -17,17 +17,17 @@
 
 ## 🚀 Features
 
-- **Hybrid AI Scanning Engine:** Optionally integrate Google Gemini to instantly map complex project structures and deeply extract nested query, path, and body parameters with incredible precision.
-- **Auto-Discovery:** Just select your project folder. APIxray automatically detects your framework and scans for API routes using blazing-fast local Regex.
-- **Smart Parameter Extraction:** Automatically extracts required query parameters, path variables, and body fields from your code using AST/Regex or advanced AI reasoning.
+- **Multi-Framework Auto-Discovery:** Instant, automatic detection of your backend framework: **Next.js**, **Express**, **FastAPI**, and **Flask**. No tedious manual route configuration required.
+- **Hybrid AI Scanning Engine:** Optionally integrate Google Gemini to map complex, non-standard project structures and deeply extract nested query, path, and body parameters with high precision.
+- **Smart Parameter Extraction:** Automatically extracts required query parameters, path variables (e.g., `:id`, `{item_id}`, `<int:user_id>`), and body fields (including Pydantic schemas and JSON payloads) using AST/Regex or advanced AI reasoning.
+- **Intelligent Port Switching:** Automatically pre-configures standard development ports based on the detected framework (`8000` for FastAPI, `5000` for Flask, `3000` for Next.js/Express).
 - **Flexible Request Methods:** Built-in dropdown selector supporting GET, POST, PUT, PATCH, DELETE, HEAD, and OPTIONS HTTP methods.
 - **Multi-View Response Display:** View API responses in three formats:
   - **Raw** - Original response exactly as received
   - **JSON** - Pretty-printed and formatted JSON with full syntax highlighting
   - **HTML** - Renders HTML responses in a sandboxed iframe for visual inspection
 - **Modern Interface:** Built with Vite and Electron for a snappy, responsive UI.
-- **No Manual Configuration:** Spend less time writing endpoint URLs and headers and more time testing.
-- **Cross-Platform:** Available for Windows and Linux.
+- **Cross-Platform:** Available for Windows (`.exe` setup) and Linux (`.deb` package).
 
 ---
 
@@ -44,9 +44,9 @@ sequenceDiagram
 
     User->>Renderer: Select Project Folder
     Renderer->>Main: IPC: api:detectProject(path)
-    Main->>Filesystem: Read /package.json
+    Main->>Filesystem: Read /package.json or Python configs
     Filesystem-->>Main: Return framework type
-    Main-->>Renderer: Return Framework (Next.js/Express)
+    Main-->>Renderer: Return Framework (Next.js/Express/FastAPI/Flask)
     
     Renderer->>Main: IPC: api:scanRoutes(path, type) OR aiScanStructure()
     Main->>Filesystem: Scan directories (e.g. /app/api)
@@ -88,7 +88,17 @@ graph TD
 
 ## � Changelog
 
-### v2.1.0 (Latest)
+### v2.2.0 (Latest)
+
+**New Features:**
+- 🐍 **FastAPI Support:** Automatic discovery of FastAPI routes, APIRouter prefixes, path variables (`{param}`), function signature query params, and Pydantic request models (`BaseModel`).
+- 🌶️ **Flask Support:** Full scanning for Flask route decorators (`@app.route`, `@bp.route`, Flask 2.0+ `@app.get/post`), Blueprint URL prefixes, converter path variables (`<int:id>`, `<string:name>`), and `request.args`/`request.get_json()` parameters.
+- 🔍 **Python Project Detection:** Seamless auto-detection via `requirements.txt`, `Pipfile`, `pyproject.toml`, `setup.py`, or root-level framework imports.
+- ⚡ **Optimized Directory Walking:** Smart exclusion of Python virtual environments (`.venv`, `venv`, `env`), cache directories (`__pycache__`, `.pytest_cache`), and build artifacts for blazing-fast scanning.
+- 🔌 **Dynamic Port Assignment:** Automatically sets the default request port to `8000` for FastAPI, `5000` for Flask, and `3000` for Next.js/Express.
+- 🤖 **Python AI Deep Scanning:** Extended Gemini structure scanning and relative Python module import resolution (`from . import ...`, `from .models import ...`) for comprehensive parameter detection.
+
+### v2.1.0
 
 **New Features:**
 - ✨ Added HTTP method dropdown selector (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS)
@@ -109,6 +119,7 @@ graph TD
 Pre-compiled binaries are available for Windows and Linux. 
 *(If you are hosting this on GitHub, upload the built `.deb` files to the **Releases** tab on GitHub).*
 
+- **[Windows (.exe) Setup Installer](https://github.com/MsCoder50/APIxray/releases/latest)**
 - **[Linux (.deb) Package](https://github.com/MsCoder50/APIxray/releases/latest)**
 
 ---
@@ -117,7 +128,7 @@ Pre-compiled binaries are available for Windows and Linux.
 
 1. **Launch the App:** Open the APIxray application.
 2. **Select Project:** Click the **Select Project Folder** button at the top left.
-3. **Choose Folder:** Pick the root directory of your Next.js or Express project.
+3. **Choose Folder:** Pick the root directory of your Next.js, Express, FastAPI, or Flask project.
 4. **Select a Route:** Click on any of the auto-detected endpoints in the left sidebar.
 5. **Fill Parameters:** APIxray will dynamically generate input fields for any Query Parameters, Path Variables, or Body Form fields it detects in your code. Fill them out.
 6. **Send Request:** Click **Send** to execute the HTTP request and view the response data in the right-hand panel.

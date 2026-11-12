@@ -1,19 +1,62 @@
 import fs from "fs";
 import path from "path";
 
+const IGNORED_DIRS = new Set([
+  'node_modules',
+  '.git',
+  '.venv',
+  'venv',
+  'env',
+  '.env',
+  '__pycache__',
+  '.pytest_cache',
+  '.mypy_cache',
+  'dist',
+  'build',
+  'out',
+  '.vite',
+  '.next',
+  '.nuxt',
+  'public',
+  'assets',
+  'coverage',
+  '.idea',
+  '.vscode'
+]);
+
 function walk(dir, callback) {
-  const files = fs.readdirSync(dir);
+  try {
+    const files = fs.readdirSync(dir);
 
-  for (const file of files) {
-    const fullPath = path.join(dir, file);
-    const stat = fs.statSync(fullPath);
+    for (const file of files) {
+      if (IGNORED_DIRS.has(file)) continue;
+      if (file.startsWith('.') && file !== '.env') continue;
 
-    if (stat.isDirectory()) {
-      walk(fullPath, callback);
-    } else {
-      callback(fullPath);
+      const fullPath = path.join(dir, file);
+      const stat = fs.statSync(fullPath);
+
+      if (stat.isDirectory()) {
+        walk(fullPath, callback);
+      } else {
+        callback(fullPath);
+      }
     }
+  } catch (err) {
+    // Ignore inaccessible directories
   }
+}
+
+function normalizeRoutePath(basePath, subPath) {
+  let combined = subPath || "/";
+  if (basePath) {
+    const cleanBase = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
+    const cleanSub = combined.startsWith('/') ? combined : `/${combined}`;
+    combined = `${cleanBase}${cleanSub}`;
+  }
+  if (!combined.startsWith('/')) {
+    combined = `/${combined}`;
+  }
+  return combined;
 }
 
 function detectMethods(filePath) {
@@ -150,6 +193,164 @@ function scanExpressRoutes(projectPath) {
   return routes;
 }
 
+export function scanFastApiFile(filePath) {
+  const routes = [];
+  let content = "";
+  try {
+    content = fs.readFileSync(filePath, "utf-8");
+  } catch (err) {
+    return routes;
+  }
+
+  // 1. Detect APIRouter prefixes defined in this file
+  const routerPrefixes = new Map();
+  const routerPrefixRegex = /([a-zA-Z0-9_]+)\s*=\s*APIRouter\s*\([^)]*prefix\s*=\s*["']([^"']+)["']/g;
+  let prefixMatch;
+  while ((prefixMatch = routerPrefixRegex.exec(content)) !== null) {
+    routerPrefixes.set(prefixMatch[1], prefixMatch[2]);
+  }
+
+  // 2. Direct HTTP method decorators:
+  // e.g. @app.get("/items"), @router.post('/login'), @api.delete("/users/{id}")
+  const methodRegex = /@([a-zA-Z0-9_]+)\.(get|post|put|delete|patch|options|head)\s*\(\s*["']([^"']+)["']/gi;
+  let match;
+  while ((match = methodRegex.exec(content)) !== null) {
+    const routerVar = match[1];
+    const httpMethod = match[2].toUpperCase();
+    const rawPath = match[3];
+    const prefix = routerPrefixes.get(routerVar) || "";
+    const finalPath = normalizeRoutePath(prefix, rawPath);
+
+    routes.push({
+      path: finalPath,
+      method: httpMethod,
+      file: filePath,
+    });
+  }
+
+  // 3. @app.api_route or @router.api_route with methods list
+  const apiRouteRegex = /@([a-zA-Z0-9_]+)\.api_route\s*\(\s*["']([^"']+)["'](?:\s*,\s*[^)]*methods\s*=\s*\[([^\]]+)\])?/gi;
+  let apiMatch;
+  while ((apiMatch = apiRouteRegex.exec(content)) !== null) {
+    const routerVar = apiMatch[1];
+    const rawPath = apiMatch[2];
+    const prefix = routerPrefixes.get(routerVar) || "";
+    const finalPath = normalizeRoutePath(prefix, rawPath);
+    const methodsListStr = apiMatch[3];
+
+    if (methodsListStr) {
+      const extractedMethods = methodsListStr
+        .split(',')
+        .map(m => m.replace(/["'\s]/g, '').toUpperCase())
+        .filter(m => ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'].includes(m));
+
+      for (const m of extractedMethods) {
+        routes.push({
+          path: finalPath,
+          method: m,
+          file: filePath,
+        });
+      }
+    } else {
+      routes.push({
+        path: finalPath,
+        method: "GET",
+        file: filePath,
+      });
+    }
+  }
+
+  return routes;
+}
+
+export function scanFlaskFile(filePath) {
+  const routes = [];
+  let content = "";
+  try {
+    content = fs.readFileSync(filePath, "utf-8");
+  } catch (err) {
+    return routes;
+  }
+
+  // 1. Detect Blueprint url_prefixes defined in this file
+  const bpPrefixes = new Map();
+  const bpPrefixRegex = /([a-zA-Z0-9_]+)\s*=\s*Blueprint\s*\([^)]*url_prefix\s*=\s*["']([^"']+)["']/g;
+  let bpMatch;
+  while ((bpMatch = bpPrefixRegex.exec(content)) !== null) {
+    bpPrefixes.set(bpMatch[1], bpMatch[2]);
+  }
+
+  // 2. Standard @app.route('/path', methods=['GET', 'POST']) or @bp.route('/path')
+  const routeRegex = /@([a-zA-Z0-9_]+)\.route\s*\(\s*["']([^"']+)["'](?:\s*,\s*[^)]*methods\s*=\s*\[([^\]]+)\])?/gi;
+  let match;
+  while ((match = routeRegex.exec(content)) !== null) {
+    const bpVar = match[1];
+    const rawPath = match[2];
+    const prefix = bpPrefixes.get(bpVar) || "";
+    const finalPath = normalizeRoutePath(prefix, rawPath);
+    const methodsListStr = match[3];
+
+    if (methodsListStr) {
+      const extractedMethods = methodsListStr
+        .split(',')
+        .map(m => m.replace(/["'\s]/g, '').toUpperCase())
+        .filter(m => ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'].includes(m));
+
+      for (const m of extractedMethods) {
+        routes.push({
+          path: finalPath,
+          method: m,
+          file: filePath,
+        });
+      }
+    } else {
+      // Flask defaults to GET if methods is omitted
+      routes.push({
+        path: finalPath,
+        method: "GET",
+        file: filePath,
+      });
+    }
+  }
+
+  // 3. Flask 2.0+ shortcut decorators: @app.get('/path'), @bp.post('/path')
+  const shortcutRegex = /@([a-zA-Z0-9_]+)\.(get|post|put|delete|patch)\s*\(\s*["']([^"']+)["']/gi;
+  let scMatch;
+  while ((scMatch = shortcutRegex.exec(content)) !== null) {
+    const bpVar = scMatch[1];
+    const httpMethod = scMatch[2].toUpperCase();
+    const rawPath = scMatch[3];
+    const prefix = bpPrefixes.get(bpVar) || "";
+    const finalPath = normalizeRoutePath(prefix, rawPath);
+
+    routes.push({
+      path: finalPath,
+      method: httpMethod,
+      file: filePath,
+    });
+  }
+
+  return routes;
+}
+
+function scanFastApiRoutes(projectPath) {
+  const routes = [];
+  walk(projectPath, (filePath) => {
+    if (!filePath.endsWith(".py")) return;
+    routes.push(...scanFastApiFile(filePath));
+  });
+  return routes;
+}
+
+function scanFlaskRoutes(projectPath) {
+  const routes = [];
+  walk(projectPath, (filePath) => {
+    if (!filePath.endsWith(".py")) return;
+    routes.push(...scanFlaskFile(filePath));
+  });
+  return routes;
+}
+
 export function scanApiRoutes(projectPath, type) {
   if (type === "nextjs") {
     return scanNextApiRoutes(projectPath);
@@ -159,6 +360,14 @@ export function scanApiRoutes(projectPath, type) {
     return scanExpressRoutes(projectPath);
   }
 
+  if (type === "fastapi") {
+    return scanFastApiRoutes(projectPath);
+  }
+
+  if (type === "flask") {
+    return scanFlaskRoutes(projectPath);
+  }
+
   return [];
 }
 
@@ -166,7 +375,7 @@ export function scanSpecificFiles(projectPath, files, type) {
   const routes = [];
   
   for (const file of files) {
-    const filePath = path.join(projectPath, file);
+    const filePath = path.isAbsolute(file) ? file : path.join(projectPath, file);
     if (!fs.existsSync(filePath)) continue;
 
     if (type === "nextjs") {
@@ -204,6 +413,14 @@ export function scanSpecificFiles(projectPath, files, type) {
           routes.push({ path: pathStr, method: methodMatch[1].toUpperCase(), file: filePath });
         }
       }
+    }
+
+    else if (type === "fastapi") {
+      routes.push(...scanFastApiFile(filePath));
+    }
+
+    else if (type === "flask") {
+      routes.push(...scanFlaskFile(filePath));
     }
   }
 
