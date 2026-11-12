@@ -88,7 +88,7 @@ graph TD
 
 ## Changelog
 
-### v2.2.0 (Latest)
+### v2.1.1 (Latest)
 
 **New Features:**
 - **FastAPI Support:** Automatic discovery of FastAPI routes, APIRouter prefixes, path variables (`{param}`), function signature query params, and Pydantic request models (`BaseModel`).
